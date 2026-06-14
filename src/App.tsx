@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { getCurrentUser } from './services/auth';
 import { DBUser } from './services/localDB';
+import { PapixLogo, LoadingSpinner } from './components/ui';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Payment from './pages/Payment';
@@ -50,9 +51,9 @@ function App() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="text-5xl font-black mb-3" style={{ background: 'linear-gradient(135deg, #e50914 0%, #ff6b35 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
+          <PapixLogo size="xl" className="mb-3" />
           <div className="flex items-center gap-2 justify-center text-gray-400">
-            <span className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+            <LoadingSpinner size="md" />
             <span>Yükleniyor...</span>
           </div>
         </div>

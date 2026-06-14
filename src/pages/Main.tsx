@@ -11,6 +11,9 @@ import { logoutUser } from '../services/auth';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import ContentRow from '../components/ContentRow';
+import StarRating from '../components/StarRating';
+import { ModalBackdrop, GradientButton } from '../components/ui';
+import type { ContentItem } from '../types';
 import {
   Search, X, Star, BookOpen, Film, Plus, Check,
   ChevronLeft, ChevronRight, Settings, Volume2,
@@ -26,21 +29,6 @@ interface MainProps {
 }
 
 type ModalType = 'video' | 'reader' | 'profile' | 'profiles' | 'notifications' | null;
-type ContentItem = DBMovie | DBCartoon;
-
-function StarWidget({ value, onChange, size = 'md' }: { value: number; onChange?: (r: number) => void; size?: 'sm' | 'md' }) {
-  const [hover, setHover] = useState(0);
-  const sz = size === 'sm' ? 'w-3.5 h-3.5' : 'w-5 h-5';
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <button key={i} type="button" onClick={() => onChange?.(i)} onMouseEnter={() => onChange && setHover(i)} onMouseLeave={() => onChange && setHover(0)} className={`transition-transform ${onChange ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`} disabled={!onChange}>
-          <Star className={`${sz} ${i <= (hover || value) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function ProfileModal({ user, onClose, onLogout }: { user: DBUser; onClose: () => void; onLogout: () => void }) {
   const trialEnd = new Date(user.trialEndsAt);
@@ -52,8 +40,8 @@ function ProfileModal({ user, onClose, onLogout }: { user: DBUser; onClose: () =
   const avatar = PUBLIC_DOMAIN_AVATARS.find((a) => a.id === activeProfile?.avatar);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <ModalBackdrop onClose={onClose}>
+      <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl" style={{ background: 'linear-gradient(135deg, #1a1a1a, #333)' }}>
             {avatar?.emoji || user.firstName[0]}
@@ -96,12 +84,12 @@ function ProfileModal({ user, onClose, onLogout }: { user: DBUser; onClose: () =
         </div>
         <div className="space-y-2">
           <button onClick={onClose} className="w-full py-2.5 rounded-xl text-sm text-gray-300 bg-gray-900 hover:bg-gray-800 border border-gray-800 transition">Kapat</button>
-          <button onClick={() => { onLogout(); onClose(); }} className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>
+          <GradientButton onClick={() => { onLogout(); onClose(); }} className="py-2.5 text-sm font-semibold">
             Çıkış Yap
-          </button>
+          </GradientButton>
         </div>
       </div>
-    </div>
+    </ModalBackdrop>
   );
 }
 
@@ -239,7 +227,7 @@ function ProfileSelector({ user, onClose, onUserUpdate }: { user: DBUser; onClos
           {pinError && <p className="text-red-400 text-xs mt-2">Hatalı PIN. Tekrar deneyin.</p>}
           <div className="flex gap-2 mt-4">
             <button onClick={() => setSelectedProfileId(null)} className="flex-1 py-2.5 rounded-xl text-sm text-gray-400 bg-gray-900 border border-gray-800 hover:bg-gray-800 transition">İptal</button>
-            <button onClick={handlePinSubmit} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>Giriş</button>
+            <GradientButton onClick={handlePinSubmit} fullWidth={false} className="flex-1 py-2.5 text-sm">Giriş</GradientButton>
           </div>
         </div>
       </div>
@@ -312,7 +300,7 @@ function ProfileSelector({ user, onClose, onUserUpdate }: { user: DBUser; onClos
             </div>
             <div className="flex gap-3 mt-4">
               <button onClick={() => setShowAddForm(false)} className="flex-1 py-3 rounded-xl text-sm text-gray-400 bg-gray-900 border border-gray-800 hover:bg-gray-800 transition">Vazgeç</button>
-              <button onClick={handleAddProfile} className="flex-1 py-3 rounded-xl text-sm font-bold text-white" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>Profili Kaydet</button>
+              <GradientButton onClick={handleAddProfile} fullWidth={false} className="flex-1 py-3 text-sm">Profili Kaydet</GradientButton>
             </div>
           </div>
         )}
@@ -404,7 +392,7 @@ function VideoModal({ movie, user, onClose, onProgress, onToggleList, onRate, is
           </div>
           <div className="flex flex-col items-end gap-1">
             <p className="text-gray-500 text-xs">Puanınız</p>
-            <StarWidget value={rating} onChange={handleRate} />
+            <StarRating value={rating} onChange={handleRate} />
             <p className="text-gray-600 text-xs">Ort: {movie.rating}/5 ({movie.votes} oy)</p>
           </div>
         </div>
@@ -464,7 +452,7 @@ function CartoonReaderModal({ cartoon, user, page, onPageChange, onClose, onProg
               <button onClick={goNext} disabled={page === cartoon.pages.length - 1} className="px-3 py-1.5 rounded-lg text-xs text-white disabled:opacity-40 transition flex items-center gap-1" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>Sonraki <ChevronRight className="w-3.5 h-3.5" /></button>
             </div>
             <div className="flex flex-col items-end gap-0.5">
-              <StarWidget value={rating} onChange={handleRate} size="sm" />
+              <StarRating value={rating} onChange={handleRate} size="sm" />
               <p className="text-gray-600 text-xs">Ort: {cartoon.rating}/5</p>
             </div>
           </div>

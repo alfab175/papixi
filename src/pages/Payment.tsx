@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { DBUser, dbUpdateUser, dbSetSession, luhnCheck } from '../services/localDB';
-import { CreditCard, Shield, CheckCircle, Star, Zap, AlertTriangle, Sparkles } from 'lucide-react';
+import { CreditCard, Shield, CheckCircle, Star, Zap, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PapixLogo, GradientButton, LoadingSpinner, PromoBadge } from '../components/ui';
+
 
 interface PaymentProps {
   user: DBUser;
@@ -177,18 +179,14 @@ export default function Payment({ user, onComplete, onSkip }: PaymentProps) {
     <div className="min-h-screen bg-black text-white" style={{ backgroundImage: 'radial-gradient(ellipse at 50% -10%, #1a0000 0%, #000 50%)' }}>
       <div className="px-8 py-6 border-b border-gray-900">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="text-3xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
+          <PapixLogo />
           <button onClick={onSkip} className="text-gray-500 hover:text-gray-300 text-sm transition">Şimdi değil, atla →</button>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full mb-5 border shadow-2xl badge-glow"
-            style={{ background: 'linear-gradient(135deg, #ff0000, #b8860b)', borderColor: '#facc15' }}>
-            <Sparkles className="w-5 h-5 text-yellow-200" />
-            <span className="text-base md:text-xl font-black tracking-wide text-white">3 AY ÜCRETSİZ DENEME</span>
-          </div>
+          <PromoBadge size="md" />
           <h1 className="text-3xl font-bold mb-2">Paketini Seç</h1>
           <p className="text-gray-400">Aboneliğinizi başlatın, ilk 3 ay boyunca ücret ödemeden Papix dünyasını keşfedin.</p>
         </div>
@@ -239,9 +237,9 @@ export default function Payment({ user, onComplete, onSkip }: PaymentProps) {
                 );
               })}
             </div>
-            <button onClick={() => setStep('card')} className="w-full py-4 rounded-2xl font-black text-lg text-white transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]" style={{ background: '#FF0000' }}>
+            <GradientButton onClick={() => setStep('card')} variant="red" className="py-4 rounded-2xl font-black text-lg hover:scale-[1.01] active:scale-[0.99]">
               Devam Et — {selectedPkg === 'premium' ? '₺50' : '₺30'}/ay
-            </button>
+            </GradientButton>
             <p className="text-center text-gray-600 text-xs mt-3">İlk 3 ay ücretsiz · Kart bilgileri sansürlü saklanır · Luhn doğrulamalı</p>
           </>
         )}
@@ -256,7 +254,7 @@ export default function Payment({ user, onComplete, onSkip }: PaymentProps) {
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #e50914 0%, transparent 50%)' }} />
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <div className="text-2xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
+                  <PapixLogo size="md" />
                   <CreditCard className="w-8 h-8 text-white/30" />
                 </div>
                 <div>
@@ -356,14 +354,14 @@ export default function Payment({ user, onComplete, onSkip }: PaymentProps) {
                 </div>
               </div>
 
-              <button
+              <GradientButton
                 type="submit"
                 disabled={loading || !isPaymentFormValid || !!cardError || !!cvvError || !!expiryError}
-                className="w-full py-4 rounded-2xl font-black text-lg text-white transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 hover:scale-[1.01] active:scale-[0.99]"
-                style={{ background: '#FF0000' }}
+                variant="red"
+                className="mt-2 py-4 rounded-2xl font-black text-lg hover:scale-[1.01] active:scale-[0.99]"
               >
-                {loading ? <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> İşleniyor...</> : <><Shield className="w-5 h-5" /> Güvenli Aktivasyon</>}
-              </button>
+                {loading ? <><LoadingSpinner size="md" /> İşleniyor...</> : <><Shield className="w-5 h-5" /> Güvenli Aktivasyon</>}
+              </GradientButton>
               {!isPaymentFormValid && (
                 <p className="text-amber-400 text-xs mt-2 text-center">Kart bilgilerini kontrol edin</p>
               )}

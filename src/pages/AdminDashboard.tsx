@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Upload, ArrowLeft, Trash2, CheckCircle, Clock, Film,
-  BookOpen, Eye, EyeOff, LayoutDashboard, Users, Shield, Mail, Globe,
+  BookOpen, LayoutDashboard, Users, Shield, Mail, Globe,
 } from 'lucide-react';
 import { uploadMovie, uploadCartoon, publishMovie, publishCartoon, removeMovie, removeCartoon } from '../services/content';
 import {
@@ -15,6 +15,8 @@ import {
   isTrustedAdminNetwork,
 } from '../services/localDB';
 import toast from 'react-hot-toast';
+import { PapixLogo, FormInput, GradientButton } from '../components/ui';
+import { INPUT_BASE_CLASS, LABEL_CLASS } from '../components/ui/FormInput';
 
 interface AdminDashboardProps {
   onBack: () => void;
@@ -163,7 +165,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>
               <Shield className="w-8 h-8 text-white" />
             </div>
-            <div className="text-3xl font-black tracking-widest mb-1" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
+            <PapixLogo className="mb-1" />
             <h2 className="text-xl font-bold text-white">Admin Gateway</h2>
             <p className="text-gray-500 text-sm mt-1">E-posta onaylı ve IP kısıtlamalı yönetici erişimi</p>
           </div>
@@ -174,18 +176,18 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
               <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-yellow-400" /> Sadece yetkili e-posta adresleri erişebilir</div>
             </div>
 
-            <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Yönetici E-postası</label>
-              <input type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} autoComplete="username" className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/30 transition" placeholder="admin@papix.com" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Şifre</label>
-              <div className="relative">
-                <input type={showPass ? 'text' : 'password'} value={adminPass} onChange={(e) => setAdminPass(e.target.value)} autoComplete="current-password" className="w-full px-4 py-3 pr-10 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/30 transition" placeholder="Admin şifresi" />
-                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">{showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
-              </div>
-            </div>
-            <button type="submit" className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>Gateway'e Giriş Yap</button>
+            <FormInput label="Yönetici E-postası" type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} autoComplete="username" placeholder="admin@papix.com" />
+            <FormInput
+              label="Şifre"
+              value={adminPass}
+              onChange={(e) => setAdminPass(e.target.value)}
+              autoComplete="current-password"
+              placeholder="Admin şifresi"
+              showPasswordToggle
+              showPassword={showPass}
+              onTogglePassword={() => setShowPass(!showPass)}
+            />
+            <GradientButton type="submit">Gateway'e Giriş Yap</GradientButton>
             <button type="button" onClick={onBack} className="w-full py-3 rounded-xl font-medium text-gray-400 text-sm bg-gray-900 hover:bg-gray-800 transition border border-gray-800">← Geri Dön</button>
           </form>
 
@@ -202,8 +204,8 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const publishedCartoons = cartoons.filter((c) => c.status === 'published');
   const totalUsers = dbGetUsers().length;
 
-  const inputCls = 'w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/30 transition placeholder-gray-600';
-  const labelCls = 'block text-xs font-medium text-gray-400 mb-1.5';
+  const inputCls = INPUT_BASE_CLASS + ' px-4 py-2.5';
+  const labelCls = LABEL_CLASS;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -211,7 +213,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={onBack} className="text-gray-400 hover:text-white transition flex items-center gap-1.5 text-sm"><ArrowLeft className="w-4 h-4" /> Geri</button>
-            <div className="text-xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
+            <PapixLogo size="sm" />
             <span className="text-gray-600 text-sm">/ Admin</span>
           </div>
           <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" /><span className="text-green-400 text-xs">Gateway Doğrulandı</span></div>
@@ -328,7 +330,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 bg-yellow-950/30 border border-yellow-800/30 rounded-xl text-xs text-yellow-500"><Clock className="w-4 h-4 flex-shrink-0" /> Yükleme sonrası içerik taslak olarak kaydedilir. Genel Bakış'tan yayınlayabilirsiniz.</div>
-              <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}><Upload className="w-4 h-4" />{loading ? 'Yükleniyor...' : 'Taslak Olarak Kaydet'}</button>
+              <GradientButton type="submit" disabled={loading}><Upload className="w-4 h-4" />{loading ? 'Yükleniyor...' : 'Taslak Olarak Kaydet'}</GradientButton>
             </form>
           </div>
         )}
@@ -356,7 +358,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                 {cPageFiles.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{cPageFiles.map((f, i) => <span key={i} className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded">{i + 1}. {f.name.slice(0, 15)}</span>)}</div>}
               </div>
               <div className="flex items-center gap-2 p-3 bg-yellow-950/30 border border-yellow-800/30 rounded-xl text-xs text-yellow-500"><Clock className="w-4 h-4 flex-shrink-0" /> Sayfa sırası önemlidir — dosyaları okuma sırasına göre seçin.</div>
-              <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}><Upload className="w-4 h-4" />{loading ? 'Yükleniyor...' : 'Taslak Olarak Kaydet'}</button>
+              <GradientButton type="submit" disabled={loading} variant="green"><Upload className="w-4 h-4" />{loading ? 'Yükleniyor...' : 'Taslak Olarak Kaydet'}</GradientButton>
             </form>
           </div>
         )}

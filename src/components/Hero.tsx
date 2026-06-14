@@ -1,5 +1,6 @@
 import { Play, Plus, Check, Star } from 'lucide-react';
 import { DBMovie, DBCartoon } from '../services/localDB';
+import { PromoBadge } from './ui';
 
 interface HeroProps {
   item: DBMovie | DBCartoon;
@@ -33,9 +34,7 @@ export default function Hero({ item, isMovie, onPlay, onAddToList, isInList }: H
           <span className="text-xs font-extrabold px-3 py-1.5 rounded-full border border-red-600/60 text-red-400 uppercase tracking-[0.25em] bg-black/30 backdrop-blur-sm">
             {typeLabel}
           </span>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs md:text-sm font-black text-white badge-glow" style={{ background: 'linear-gradient(135deg, #ff0000, #b8860b)', border: '1px solid rgba(250,204,21,0.55)' }}>
-            3 AY ÜCRETSİZ
-          </span>
+          <PromoBadge />
         </div>
 
         <h1 className="text-5xl md:text-7xl font-black text-white leading-[0.95] mb-4 tracking-tight">

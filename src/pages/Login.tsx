@@ -10,8 +10,9 @@ import {
   dbSetSession,
   clear2FASession,
 } from '../services/localDB';
-import { Mail, Lock, Eye, EyeOff, Shield, Smartphone, QrCode, ChevronLeft } from 'lucide-react';
+import { Mail, Lock, Shield, Smartphone, QrCode, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AuthPageLayout, FormInput, GradientButton, LoadingSpinner } from '../components/ui';
 
 interface LoginProps {
   onLoginSuccess: (user: DBUser) => void;
@@ -94,10 +95,7 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onAdminClick
 
   if (step === 'twofa') {
     return (
-      <div className="min-h-screen bg-black flex flex-col" style={{ backgroundImage: 'radial-gradient(ellipse at 50% -10%, #3d0000 0%, #000 55%)' }}>
-        <div className="px-8 py-6">
-          <div className="text-3xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
-        </div>
+      <AuthPageLayout>
 
         <div className="flex-1 flex items-center justify-center px-4 pb-12">
           <div className="w-full max-w-sm">
@@ -135,14 +133,9 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onAdminClick
                   {twoFAError && <p className="text-red-400 text-xs mt-1.5 text-center">Hatalı kod. Lütfen tekrar deneyin.</p>}
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={twoFACode.length !== 6}
-                  className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}
-                >
+                <GradientButton type="submit" disabled={twoFACode.length !== 6} variant="green">
                   Doğrula ve Giriş Yap
-                </button>
+                </GradientButton>
               </form>
 
               <p className="text-center text-gray-600 text-xs mt-4">
@@ -154,15 +147,12 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onAdminClick
             </div>
           </div>
         </div>
-      </div>
+      </AuthPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col" style={{ backgroundImage: 'radial-gradient(ellipse at 50% -10%, #3d0000 0%, #000 55%)' }}>
-      <div className="px-8 py-6">
-        <div className="text-3xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
-      </div>
+    <AuthPageLayout>
 
       <div className="flex-1 flex items-center justify-center px-4 pb-12">
         <div className="w-full max-w-5xl">
@@ -172,47 +162,31 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onAdminClick
               <p className="text-gray-500 mb-8 text-sm">Papix'e hoş geldiniz — film, dizi & karikatür platformu</p>
 
               <form onSubmit={handleLogin} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">E-posta Adresi</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                      className="w-full pl-11 pr-4 py-3.5 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition text-sm"
-                      placeholder="ornek@email.com"
-                    />
-                  </div>
-                </div>
+                <FormInput
+                  label="E-posta Adresi"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  icon={<Mail className="w-4 h-4" />}
+                  placeholder="ornek@email.com"
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Şifre</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input
-                      type={showPass ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      autoComplete="current-password"
-                      className="w-full pl-11 pr-12 py-3.5 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition text-sm"
-                      placeholder="Şifreniz"
-                    />
-                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition">
-                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
+                <FormInput
+                  label="Şifre"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  icon={<Lock className="w-4 h-4" />}
+                  placeholder="Şifreniz"
+                  showPasswordToggle
+                  showPassword={showPass}
+                  onTogglePassword={() => setShowPass(!showPass)}
+                />
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: loading ? '#555' : 'linear-gradient(135deg, #e50914, #c5000f)' }}
-                >
-                  {loading ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Kontrol ediliyor...</> : <>Giriş Yap →</>}
-                </button>
+                <GradientButton type="submit" disabled={loading}>
+                  {loading ? <><LoadingSpinner /> Kontrol ediliyor...</> : <>Giriş Yap →</>}
+                </GradientButton>
               </form>
 
               <div className="mt-6 text-center">
@@ -271,6 +245,6 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onAdminClick
           </div>
         </div>
       </div>
-    </div>
+    </AuthPageLayout>
   );
 }

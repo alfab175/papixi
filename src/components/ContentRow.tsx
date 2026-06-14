@@ -1,9 +1,7 @@
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ContentCard from './ContentCard';
-import { DBMovie, DBCartoon } from '../services/localDB';
-
-type ContentItem = DBMovie | DBCartoon;
+import type { ContentItem } from '../types';
 
 interface ContentRowProps {
   title: string;

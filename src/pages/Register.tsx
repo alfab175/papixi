@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { registerUser, validatePassword } from '../services/auth';
 import { DBUser } from '../services/localDB';
-import { Mail, Lock, User, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, Lock, User, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AuthPageLayout, FormInput, GradientButton, LoadingSpinner, PromoBadge, ModalBackdrop } from '../components/ui';
 
 interface RegisterProps {
   onRegisterSuccess: (user: DBUser) => void;
@@ -53,19 +54,12 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }: Registe
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col" style={{ backgroundImage: 'radial-gradient(ellipse at 50% -10%, #3d0000 0%, #000 55%)' }}>
-      <div className="px-8 py-6">
-        <div className="text-3xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAPIX</div>
-      </div>
-
+    <AuthPageLayout>
       <div className="flex-1 flex items-center justify-center px-4 pb-8">
         <div className="w-full max-w-md">
           <div className="bg-gray-950/90 border border-gray-800 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
             <div className="flex flex-col items-start gap-3 mb-6">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border badge-glow"
-                style={{ background: 'linear-gradient(135deg, #ff0000, #b8860b)', borderColor: '#facc15' }}>
-                <span className="text-sm font-black tracking-wide text-white">3 AY ÜCRETSİZ</span>
-              </div>
+              <PromoBadge />
               <div>
                 <h1 className="text-3xl md:text-4xl font-black text-white mb-1">Hesap Oluştur</h1>
                 <p className="text-gray-400 text-sm">Papix'e katıl, 3 ay ücretsiz keşfet ve istediğin zaman iptal et.</p>
@@ -74,47 +68,25 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }: Registe
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Ad</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                    <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} autoComplete="given-name"
-                      className="w-full pl-9 pr-3 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/30 text-sm transition"
-                      placeholder="Adınız" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Soyad</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                    <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} autoComplete="family-name"
-                      className="w-full pl-9 pr-3 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/30 text-sm transition"
-                      placeholder="Soyadınız" />
-                  </div>
-                </div>
+                <FormInput label="Ad" type="text" value={firstName} onChange={e => setFirstName(e.target.value)} autoComplete="given-name" icon={<User className="w-4 h-4" />} placeholder="Adınız" />
+                <FormInput label="Soyad" type="text" value={lastName} onChange={e => setLastName(e.target.value)} autoComplete="family-name" icon={<User className="w-4 h-4" />} placeholder="Soyadınız" />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">E-posta Adresi</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email"
-                    className="w-full pl-9 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/30 text-sm transition"
-                    placeholder="ornek@email.com" />
-                </div>
-              </div>
+              <FormInput label="E-posta Adresi" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" icon={<Mail className="w-4 h-4" />} placeholder="ornek@email.com" />
 
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">Şifre</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                  <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password"
-                    className={`w-full pl-9 pr-10 py-3 bg-gray-900 border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-1 text-sm transition ${password && !allRulesOk ? 'border-red-700 focus:border-red-500 focus:ring-red-500/30' : 'border-gray-700 focus:border-red-600 focus:ring-red-600/30'}`}
-                    placeholder="Min. 8 karakter, büyük harf, rakam" />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition">
-                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                <FormInput
+                  label="Şifre"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  icon={<Lock className="w-4 h-4" />}
+                  placeholder="Min. 8 karakter, büyük harf, rakam"
+                  showPasswordToggle
+                  showPassword={showPass}
+                  onTogglePassword={() => setShowPass(!showPass)}
+                  error={password && !allRulesOk ? ' ' : undefined}
+                />
                 {password && (
                   <div className="mt-2.5 grid grid-cols-2 gap-1">
                     {rules.map(r => (
@@ -127,18 +99,16 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }: Registe
                 )}
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">Şifre Tekrar</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                  <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="new-password"
-                    className={`w-full pl-9 pr-4 py-3 bg-gray-900 border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-1 text-sm transition ${confirmPassword && confirmPassword !== password ? 'border-red-700 focus:ring-red-500/30' : 'border-gray-700 focus:border-red-600 focus:ring-red-600/30'}`}
-                    placeholder="Şifrenizi tekrar girin" />
-                </div>
-                {confirmPassword && confirmPassword !== password && (
-                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><XCircle className="w-3 h-3" /> Şifreler eşleşmiyor</p>
-                )}
-              </div>
+              <FormInput
+                label="Şifre Tekrar"
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                icon={<Lock className="w-4 h-4" />}
+                placeholder="Şifrenizi tekrar girin"
+                error={confirmPassword && confirmPassword !== password ? 'Şifreler eşleşmiyor' : undefined}
+              />
 
               {/* Terms of Service - ZORUNLU */}
               <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
@@ -167,11 +137,9 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }: Registe
                 )}
               </div>
 
-              <button type="submit" disabled={loading || !allRulesOk || !acceptedTerms}
-                className="w-full py-4 rounded-2xl font-black text-base text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 hover:scale-[1.01] active:scale-[0.99]"
-                style={{ background: '#FF0000' }}>
-                {loading ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Kayıt yapılıyor...</> : 'Kayıt Ol ve Başla'}
-              </button>
+              <GradientButton type="submit" disabled={loading || !allRulesOk || !acceptedTerms} variant="red" className="mt-2 py-4 rounded-2xl font-black text-base hover:scale-[1.01] active:scale-[0.99]">
+                {loading ? <><LoadingSpinner /> Kayıt yapılıyor...</> : 'Kayıt Ol ve Başla'}
+              </GradientButton>
             </form>
 
             <div className="mt-5 text-center">
@@ -186,8 +154,8 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }: Registe
 
       {/* Terms Modal */}
       {showTerms && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowTerms(false)}>
-          <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <ModalBackdrop onClose={() => setShowTerms(false)}>
+          <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-white mb-4">Kullanım Koşulları & Gizlilik Politikası</h2>
             <div className="space-y-4 text-gray-400 text-sm leading-relaxed">
               <div>
@@ -211,13 +179,12 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }: Registe
                 <p>Platform içeriklerini yalnızca kişisel kullanım amacıyla izleyebilirsiniz. Yeniden dağıtım yasaktır.</p>
               </div>
             </div>
-            <button onClick={() => { setAcceptedTerms(true); setShowTerms(false); }}
-              className="w-full mt-6 py-3 rounded-xl font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg, #e50914, #c5000f)' }}>
+            <GradientButton onClick={() => { setAcceptedTerms(true); setShowTerms(false); }} className="mt-6">
               Okudum, Kabul Ediyorum
-            </button>
+            </GradientButton>
           </div>
-        </div>
+        </ModalBackdrop>
       )}
-    </div>
+    </AuthPageLayout>
   );
 }

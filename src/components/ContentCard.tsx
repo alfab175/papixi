@@ -1,8 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { Plus, Check, Star, Play, BookOpen, Film } from 'lucide-react';
 import { DBMovie, DBCartoon } from '../services/localDB';
-
-type ContentItem = DBMovie | DBCartoon;
+import type { ContentItem } from '../types';
 
 interface ContentCardProps {
   item: ContentItem;

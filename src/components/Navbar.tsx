@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Search, ChevronDown, Bell } from 'lucide-react';
 import { DBUser, DBProfile, PUBLIC_DOMAIN_AVATARS } from '../services/localDB';
+import { PapixLogo } from './ui';
 
 interface NavbarProps {
   user: DBUser;
@@ -47,9 +48,7 @@ export default function Navbar({ user, activeSection, onSectionChange, onAdminCl
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <button onClick={() => handleNav('home')} className="flex-shrink-0">
-            <span className="text-2xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, #e50914, #ff6b35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              PAPIX
-            </span>
+            <PapixLogo size="md" />
           </button>
 
           {/* Desktop Nav */}
