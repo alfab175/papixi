@@ -22,6 +22,8 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Kalıcı oturum ayarla
-setPersistence(auth, browserLocalPersistence);
+setPersistence(auth, browserLocalPersistence).catch((err) => {
+  console.error('Firebase persistence could not be set:', err);
+});
 
 export default app;

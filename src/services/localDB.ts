@@ -81,12 +81,19 @@ const get = <T>(key: string, fallback: T): T => {
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
-  } catch {
+  } catch (err) {
+    console.warn(`Failed to parse localStorage key "${key}", returning fallback:`, err);
     return fallback;
   }
 };
 
-const set = (key: string, value: unknown) => localStorage.setItem(key, JSON.stringify(value));
+const set = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    console.error(`Failed to write localStorage key "${key}" (storage may be full):`, err);
+  }
+};
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 export const PUBLIC_DOMAIN_AVATARS = [
@@ -188,7 +195,9 @@ export const dbGetSession = (): DBUser | null => {
     if (!user.profileMyList[user.activeProfileId]) user.profileMyList[user.activeProfileId] = user.myList || [];
     if (!user.profileProgress[user.activeProfileId]) user.profileProgress[user.activeProfileId] = user.progress || {};
     return user;
-  } catch {
+  } catch (err) {
+    console.warn('Corrupted session data in localStorage, clearing session:', err);
+    localStorage.removeItem(KEYS.SESSION);
     return null;
   }
 };
@@ -262,33 +271,40 @@ export const dbUpdateCartoon = (id: string, updates: Partial<DBCartoon>) => {
 export const dbDeleteCartoon = (id: string) => dbSaveCartoons(dbGetCartoons().filter((c) => c.id !== id));
 
 // ─── RATINGS ────────────────────────────────────────────────
-export const dbRateContent = (userId: string, contentId: string, rating: number, type: 'movie' | 'cartoon') => {
+export const dbRateContent = (userId: string, contentId: string, rating: number, type: 'movie' | 'cartoon'): boolean => {
   const users = dbGetUsers();
   const userIndex = users.findIndex((u) => u.id === userId);
-  if (userIndex !== -1) {
-    users[userIndex].ratings[contentId] = rating;
-    dbSaveUsers(users);
+  if (userIndex === -1) {
+    console.error(`dbRateContent: user "${userId}" not found`);
+    return false;
   }
+  users[userIndex].ratings[contentId] = rating;
+  dbSaveUsers(users);
 
   if (type === 'movie') {
     const movies = dbGetMovies();
     const movieIndex = movies.findIndex((m) => m.id === contentId);
-    if (movieIndex !== -1) {
-      const allRatings = dbGetUsers().map((u) => u.ratings[contentId]).filter(Boolean);
-      movies[movieIndex].rating = Math.round((allRatings.reduce((a, b) => a + b, 0) / allRatings.length) * 10) / 10;
-      movies[movieIndex].votes = allRatings.length;
-      dbSaveMovies(movies);
+    if (movieIndex === -1) {
+      console.warn(`dbRateContent: movie "${contentId}" not found`);
+      return false;
     }
+    const allRatings = dbGetUsers().map((u) => u.ratings[contentId]).filter(Boolean);
+    movies[movieIndex].rating = Math.round((allRatings.reduce((a, b) => a + b, 0) / allRatings.length) * 10) / 10;
+    movies[movieIndex].votes = allRatings.length;
+    dbSaveMovies(movies);
   } else {
     const cartoons = dbGetCartoons();
     const cartoonIndex = cartoons.findIndex((c) => c.id === contentId);
-    if (cartoonIndex !== -1) {
-      const allRatings = dbGetUsers().map((u) => u.ratings[contentId]).filter(Boolean);
-      cartoons[cartoonIndex].rating = Math.round((allRatings.reduce((a, b) => a + b, 0) / allRatings.length) * 10) / 10;
-      cartoons[cartoonIndex].votes = allRatings.length;
-      dbSaveCartoons(cartoons);
+    if (cartoonIndex === -1) {
+      console.warn(`dbRateContent: cartoon "${contentId}" not found`);
+      return false;
     }
+    const allRatings = dbGetUsers().map((u) => u.ratings[contentId]).filter(Boolean);
+    cartoons[cartoonIndex].rating = Math.round((allRatings.reduce((a, b) => a + b, 0) / allRatings.length) * 10) / 10;
+    cartoons[cartoonIndex].votes = allRatings.length;
+    dbSaveCartoons(cartoons);
   }
+  return true;
 };
 
 // ─── MY LIST ────────────────────────────────────────────────
@@ -329,17 +345,20 @@ export const getActiveProfileProgressValue = (user: DBUser, contentId: string): 
   return user.progress?.[contentId]?.value || 0;
 };
 
-export const dbSaveProgress = (userId: string, contentId: string, value: number, profileId?: string) => {
+export const dbSaveProgress = (userId: string, contentId: string, value: number, profileId?: string): boolean => {
   const users = dbGetUsers();
   const index = users.findIndex((u) => u.id === userId);
-  if (index !== -1) {
-    const activeProfileId = profileId || users[index].activeProfileId;
-    if (!users[index].profileProgress) users[index].profileProgress = {};
-    if (!users[index].profileProgress[activeProfileId]) users[index].profileProgress[activeProfileId] = {};
-    users[index].profileProgress[activeProfileId][contentId] = { value, updatedAt: new Date().toISOString() };
-    users[index].progress[contentId] = { value, updatedAt: new Date().toISOString() };
-    dbSaveUsers(users);
+  if (index === -1) {
+    console.error(`dbSaveProgress: user "${userId}" not found, progress not saved`);
+    return false;
   }
+  const activeProfileId = profileId || users[index].activeProfileId;
+  if (!users[index].profileProgress) users[index].profileProgress = {};
+  if (!users[index].profileProgress[activeProfileId]) users[index].profileProgress[activeProfileId] = {};
+  users[index].profileProgress[activeProfileId][contentId] = { value, updatedAt: new Date().toISOString() };
+  users[index].progress[contentId] = { value, updatedAt: new Date().toISOString() };
+  dbSaveUsers(users);
+  return true;
 };
 
 // ─── PROFILES ───────────────────────────────────────────────
@@ -377,11 +396,17 @@ export const dbUpdateProfile = (userId: string, profileId: string, updates: Part
   return users[userIndex].profiles[profileIndex];
 };
 
-export const dbDeleteProfile = (userId: string, profileId: string) => {
+export const dbDeleteProfile = (userId: string, profileId: string): boolean => {
   const users = dbGetUsers();
   const userIndex = users.findIndex((u) => u.id === userId);
-  if (userIndex === -1) return;
-  if (users[userIndex].profiles.length <= 1) return;
+  if (userIndex === -1) {
+    console.error(`dbDeleteProfile: user "${userId}" not found`);
+    return false;
+  }
+  if (users[userIndex].profiles.length <= 1) {
+    console.warn('dbDeleteProfile: cannot delete the last profile');
+    return false;
+  }
 
   users[userIndex].profiles = users[userIndex].profiles.filter((p) => p.id !== profileId);
   if (users[userIndex].profileMyList?.[profileId]) delete users[userIndex].profileMyList[profileId];
@@ -393,6 +418,7 @@ export const dbDeleteProfile = (userId: string, profileId: string) => {
     users[userIndex].progress = users[userIndex].profileProgress?.[nextProfileId] || {};
   }
   dbSaveUsers(users);
+  return true;
 };
 
 // ─── INITIAL PUBLIC DOMAIN CONTENT ──────────────────────────

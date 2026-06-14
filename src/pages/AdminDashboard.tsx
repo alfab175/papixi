@@ -141,9 +141,12 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   };
 
   const handlePublish = (id: string, type: 'movie' | 'cartoon') => {
-    if (type === 'movie') publishMovie(id);
-    else publishCartoon(id);
-    toast.success('İçerik yayınlandı!');
+    const success = type === 'movie' ? publishMovie(id) : publishCartoon(id);
+    if (success) {
+      toast.success('İçerik yayınlandı!');
+    } else {
+      toast.error('İçerik bulunamadı veya yayınlanamadı');
+    }
     refreshData();
   };
 

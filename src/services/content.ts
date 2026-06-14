@@ -22,8 +22,10 @@ export const uploadMovie = async (
       ageRating: 'all', languages: ['Türkçe', 'İngilizce'], subtitles: ['Türkçe', 'İngilizce'],
     });
     return { success: true, id: movie.id };
-  } catch {
-    return { success: false, error: 'Yükleme hatası' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Yükleme hatası';
+    console.error('uploadMovie failed:', err);
+    return { success: false, error: message };
   }
 };
 
@@ -40,15 +42,33 @@ export const uploadCartoon = async (
       rating: 0, votes: 0, status: 'draft', ageRating: 'all',
     });
     return { success: true, id: cartoon.id };
-  } catch {
-    return { success: false, error: 'Yükleme hatası' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Yükleme hatası';
+    console.error('uploadCartoon failed:', err);
+    return { success: false, error: message };
   }
 };
 
-export const publishMovie = (id: string) => dbUpdateMovie(id, { status: 'published' });
-export const publishCartoon = (id: string) => dbUpdateCartoon(id, { status: 'published' });
-export const unpublishMovie = (id: string) => dbUpdateMovie(id, { status: 'draft' });
-export const unpublishCartoon = (id: string) => dbUpdateCartoon(id, { status: 'draft' });
+export const publishMovie = (id: string): boolean => {
+  const result = dbUpdateMovie(id, { status: 'published' });
+  if (!result) console.warn(`publishMovie: movie "${id}" not found`);
+  return result !== null;
+};
+export const publishCartoon = (id: string): boolean => {
+  const result = dbUpdateCartoon(id, { status: 'published' });
+  if (!result) console.warn(`publishCartoon: cartoon "${id}" not found`);
+  return result !== null;
+};
+export const unpublishMovie = (id: string): boolean => {
+  const result = dbUpdateMovie(id, { status: 'draft' });
+  if (!result) console.warn(`unpublishMovie: movie "${id}" not found`);
+  return result !== null;
+};
+export const unpublishCartoon = (id: string): boolean => {
+  const result = dbUpdateCartoon(id, { status: 'draft' });
+  if (!result) console.warn(`unpublishCartoon: cartoon "${id}" not found`);
+  return result !== null;
+};
 export const removeMovie = (id: string) => dbDeleteMovie(id);
 export const removeCartoon = (id: string) => dbDeleteCartoon(id);
 export const getPublishedMovies = (): DBMovie[] => dbGetPublishedMovies();

@@ -495,6 +495,8 @@ export default function Main({ user, onUserUpdate, onAdminClick, onLogout }: Mai
     if (fresh) {
       setCurrentUser(fresh);
       onUserUpdate(fresh);
+    } else {
+      console.error(`refreshUser: user "${user.id}" no longer exists in DB`);
     }
   }, [user.id, onUserUpdate]);
 
@@ -532,10 +534,14 @@ export default function Main({ user, onUserUpdate, onAdminClick, onLogout }: Mai
   };
 
   const handleRate = (id: string, rating: number, type: 'movie' | 'cartoon') => {
-    dbRateContent(currentUser.id, id, rating, type);
+    const success = dbRateContent(currentUser.id, id, rating, type);
+    if (success) {
+      toast.success(`${rating} yıldız verildi ⭐`);
+    } else {
+      toast.error('Puan kaydedilemedi');
+    }
     refreshUser();
     loadContent();
-    toast.success(`${rating} yıldız verildi ⭐`);
   };
 
   const handleProgress = (contentId: string, progress: number) => dbSaveProgress(currentUser.id, contentId, progress, currentUser.activeProfileId);

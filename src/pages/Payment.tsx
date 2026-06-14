@@ -168,6 +168,9 @@ export default function Payment({ user, onComplete, onSkip }: PaymentProps) {
       dbSetSession(updated);
       toast.success(`${selectedPkg === 'premium' ? '⚡ Premium' : '⭐ Standart'} paket aktif! 3 ay ücretsiz başladı 🎉`);
       onComplete(updated);
+    } else {
+      console.error('Payment: dbUpdateUser returned null for user', user.id);
+      toast.error('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
     }
 
     setLoading(false);
